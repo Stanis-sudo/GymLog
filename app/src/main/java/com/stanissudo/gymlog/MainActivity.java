@@ -35,9 +35,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(MainActivity.this, "It worked!", Toast.LENGTH_SHORT).show();
-
+                getInformationFromDisplay();
+                updateDisplay();
             }
         });
+    }
+
+    private void updateDisplay() {
+        String currentInfo = binding.logDisplayTextView.getText().toString();
+        String newDisplay = String.format(Locale.US, "Exercise:%s%nWeight:%.2f%nReps:%d%n=-=-=-=%n%s", exercise, weight, repetitions, currentInfo);
+        binding.logDisplayTextView.setText(newDisplay);
+    }
+
+    private void getInformationFromDisplay() {
+        exercise = binding.exerciseInputEditText.getText().toString();
+        try {
+            weight = Double.parseDouble(binding.weightInputEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            Log.d(TAG, "Error reading value from Weight edit text.");
+        }
+        try {
+            repetitions = Integer.parseInt(binding.repetitionInputEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            Log.d(TAG, "Error reading value from Repetitions edit text.");
+        }
     }
 
 }

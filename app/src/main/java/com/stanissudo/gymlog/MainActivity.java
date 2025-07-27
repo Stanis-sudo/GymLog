@@ -12,12 +12,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.stanissudo.gymlog.database.GymLogRepository;
+import com.stanissudo.gymlog.database.entities.GymLog;
 import com.stanissudo.gymlog.databinding.ActivityMainBinding;
 
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-    ActivityMainBinding binding;
+    private ActivityMainBinding binding;
+    private GymLogRepository repository;
     public static final String TAG = "Stan_GymLog";
     String exercise = "";
     double weight = 0.0;
@@ -29,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        repository = new GymLogRepository(getApplication());
+
         binding.logDisplayTextView.setMovementMethod(new ScrollingMovementMethod());
 
         binding.logButton.setOnClickListener(new View.OnClickListener() {
@@ -36,11 +41,15 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Toast.makeText(MainActivity.this, "It worked!", Toast.LENGTH_SHORT).show();
                 getInformationFromDisplay();
+                insertGymLogRecord();
                 updateDisplay();
             }
         });
     }
-
+public void insertGymLogRecord(){
+    GymLog log = new GymLog(exercise, weight, repetitions);
+    repository.insertGymLog(log);
+}
     private void updateDisplay() {
         String currentInfo = binding.logDisplayTextView.getText().toString();
         String newDisplay = String.format(Locale.US, "Exercise:%s%nWeight:%.2f%nReps:%d%n=-=-=-=%n%s", exercise, weight, repetitions, currentInfo);

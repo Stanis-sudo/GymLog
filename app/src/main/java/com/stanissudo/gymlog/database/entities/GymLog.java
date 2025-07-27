@@ -3,10 +3,9 @@ package com.stanissudo.gymlog.database.entities;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.stanissudo.gymlog.database.GymLogDAO;
 import com.stanissudo.gymlog.database.GymLogDatabase;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(tableName = GymLogDatabase.gymLogTable)
@@ -16,13 +15,13 @@ public class GymLog {
     private String exercise;
     private double weight;
     private int repetitions;
-    private LocalDate logDate;
+    private LocalDateTime logDate;
 
     public GymLog(String exercise, double weight, int repetitions) {
         this.exercise = exercise;
         this.weight = weight;
         this.repetitions = repetitions;
-        this.logDate = LocalDate.now();
+        this.logDate = LocalDateTime.now();
     }
 
     public int getId() {
@@ -57,11 +56,11 @@ public class GymLog {
         this.repetitions = repetitions;
     }
 
-    public LocalDate getLogDate() {
+    public LocalDateTime getLogDate() {
         return logDate;
     }
 
-    public void setLogDate(LocalDate logDate) {
+    public void setLogDate(LocalDateTime logDate) {
         this.logDate = logDate;
     }
 

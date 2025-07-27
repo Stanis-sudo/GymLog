@@ -1,5 +1,6 @@
 package com.stanissudo.gymlog.database;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -14,7 +15,7 @@ public interface GymLogDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(GymLog gymlog);
 
-    @Query("Select * from " + GymLogDatabase.gymLogTable + " ORDER BY logDate DESC")
-    List<GymLog> getAllRecords();
+    @Query("SELECT * FROM " + GymLogDatabase.GYM_LOG_TABLE + " ORDER BY logDate DESC")
+    LiveData<List<GymLog>> getAllRecords();
 
 }

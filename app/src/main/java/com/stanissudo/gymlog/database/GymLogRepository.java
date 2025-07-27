@@ -3,22 +3,29 @@ package com.stanissudo.gymlog.database;
 import android.app.Application;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+
 import com.stanissudo.gymlog.MainActivity;
 import com.stanissudo.gymlog.database.entities.GymLog;
+import com.stanissudo.gymlog.database.entities.User;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class GymLogRepository {
-    private GymLogDAO gymLogDAO;
-    private ArrayList<GymLog> allLogs;
+    private final GymLogDAO gymLogDAO;
+    private final UserDAO userDAO;
+    private LiveData<List<GymLog>> allLogs;
 private static GymLogRepository repository;
     private GymLogRepository(Application application) {
         GymLogDatabase db = GymLogDatabase.getDatabase(application);
         this.gymLogDAO = db.gymLogDAO();
-        this.allLogs = (ArrayList<GymLog>) this.gymLogDAO.getAllRecords();
+        this.userDAO = db.userDAO();
+        this.allLogs = this.gymLogDAO.getAllRecords();
+        //this.allLogs = (ArrayList<GymLog>) this.gymLogDAO.getAllRecords();
     }
 
     public static GymLogRepository getRepository(Application application){
@@ -41,26 +48,36 @@ private static GymLogRepository repository;
         }
         return null;
     }
-    public ArrayList<GymLog> getAllLogs() {
-        Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
-                new Callable<ArrayList<GymLog>>() {
-                    @Override
-                    public ArrayList<GymLog> call() throws Exception {
-                        return (ArrayList<GymLog>) gymLogDAO.getAllRecords();
-                    }
-                }
-        );
-        try {
-            return future.get();
 
-        } catch (InterruptedException | ExecutionException e) {
-            Log.i(MainActivity.TAG, "Problem when getting all GymLogs in the repository");
-        }
-        return null;
+    public LiveData<List<GymLog>> getAllLogs() {
+        return gymLogDAO.getAllRecords();
     }
+//    public ArrayList<GymLog> getAllLogs() {
+//        Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
+//                new Callable<ArrayList<GymLog>>() {
+//                    @Override
+//                    public ArrayList<GymLog> call() throws Exception {
+//                        return (ArrayList<GymLog>) gymLogDAO.getAllRecords();
+//                    }
+//                }
+//        );
+//        try {
+//            return future.get();
+//
+//        } catch (InterruptedException | ExecutionException e) {
+//            Log.i(MainActivity.TAG, "Problem when getting all GymLogs in the repository");
+//        }
+//        return null;
+//    }
     public  void insertGymLog(GymLog gymLog){
         GymLogDatabase.databaseWriteExecutor.execute(() ->{
             gymLogDAO.insert(gymLog);
+        });
+    }
+
+    public  void insertUser(User... user){
+        GymLogDatabase.databaseWriteExecutor.execute(() ->{
+            userDAO.insert(user);
         });
     }
 }

@@ -11,6 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.stanissudo.gymlog.MainActivity;
 import com.stanissudo.gymlog.database.entities.GymLog;
+import com.stanissudo.gymlog.database.entities.User;
 import com.stanissudo.gymlog.database.typeConverters.LocalDataTypeConverter;
 
 import org.jspecify.annotations.NonNull;
@@ -19,19 +20,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @TypeConverters(LocalDataTypeConverter.class)
-@Database(entities = {GymLog.class}, version =1, exportSchema = false)
+@Database(entities = {GymLog.class, User.class}, version = 3, exportSchema = false)
 public abstract class GymLogDatabase extends RoomDatabase {
-    private static final String DATABASE_NAME = "GymLog_database";
-    public static final String gymLogTable = "gymLogTable";
+    public static final String USER_TABLE = "userTable";
+    private static final String DATABASE_NAME = "GymLogDatabase";
+    public static final String GYM_LOG_TABLE = "gymLogTable";
     private static volatile GymLogDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;
     static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
-    static GymLogDatabase getDatabase(final Context context){
-        if (INSTANCE == null){
-            synchronized (GymLogDatabase.class){
-                if(INSTANCE == null){
+
+    static GymLogDatabase getDatabase(final Context context) {
+        if (INSTANCE == null) {
+            synchronized (GymLogDatabase.class) {
+                if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            GymLogDatabase.class, DATABASE_NAME)
+                                    GymLogDatabase.class, DATABASE_NAME)
                             .fallbackToDestructiveMigration()
                             .addCallback(addDefaultValues)
                             .build();
@@ -41,14 +44,25 @@ public abstract class GymLogDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    private static final RoomDatabase.Callback addDefaultValues = new RoomDatabase.Callback(){
+    private static final RoomDatabase.Callback addDefaultValues = new RoomDatabase.Callback() {
         @Override
-        public void onCreate(@NonNull SupportSQLiteDatabase db){
+        public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
             Log.i(MainActivity.TAG, "DATABASE CREATED!");
-            //TODO: add databaseWriteExecutor.execute() -> {...}
+            databaseWriteExecutor.execute(() -> {
+                UserDAO dao = INSTANCE.userDAO();
+                dao.deleteAll();
+                User admin = new User("admin", "admin");
+                admin.setAdmin(true);
+                dao.insert(admin);
+
+                User testUser = new User("testuser", "testuser");
+                dao.insert(testUser);
+            });
         }
     };
 
     public abstract GymLogDAO gymLogDAO();
+
+    public abstract UserDAO userDAO();
 }

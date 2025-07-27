@@ -12,13 +12,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.stanissudo.gymlog.database.GymLogRepository;
+import com.stanissudo.gymlog.database.entities.GymLog;
 import com.stanissudo.gymlog.databinding.ActivityMainBinding;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-    ActivityMainBinding binding;
-    private static final String TAG = "Stan_GymLog";
+    private ActivityMainBinding binding;
+    private GymLogRepository repository;
+    public static final String TAG = "Stan_GymLog";
     String exercise = "";
     double weight = 0.0;
     int repetitions = 0;
@@ -28,23 +32,42 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        repository = GymLogRepository.getRepository(getApplication());
         binding.logDisplayTextView.setMovementMethod(new ScrollingMovementMethod());
-
+        updateDisplay();
         binding.logButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(MainActivity.this, "It worked!", Toast.LENGTH_SHORT).show();
                 getInformationFromDisplay();
+                insertGymLogRecord();
                 updateDisplay();
             }
         });
     }
 
+    public void insertGymLogRecord() {
+        if (exercise.isEmpty()) {
+            return;
+        }
+        GymLog log = new GymLog(exercise, weight, repetitions);
+        repository.insertGymLog(log);
+    }
+
     private void updateDisplay() {
-        String currentInfo = binding.logDisplayTextView.getText().toString();
-        String newDisplay = String.format(Locale.US, "Exercise:%s%nWeight:%.2f%nReps:%d%n=-=-=-=%n%s", exercise, weight, repetitions, currentInfo);
-        binding.logDisplayTextView.setText(newDisplay);
+        ArrayList<GymLog> allLogs = repository.getAllLogs();
+        if (allLogs.isEmpty()) {
+            binding.logDisplayTextView.setText(R.string.nothing_to_show_time_to_hit_the_gym);
+        }
+        StringBuilder sb = new StringBuilder();
+        for (GymLog log : allLogs) {
+            sb.append(log);
+        }
+        binding.logDisplayTextView.setText(sb.toString());
+//        String currentInfo = binding.logDisplayTextView.getText().toString();
+//        String newDisplay = String.format(Locale.US, "Exercise:%s%nWeight:%.2f%nReps:%d%n=-=-=-=%n%s", exercise, weight, repetitions, currentInfo);
+//        binding.logDisplayTextView.setText(newDisplay);
+//        Log.i(TAG, repository.getAllLogs().toString());
     }
 
     private void getInformationFromDisplay() {

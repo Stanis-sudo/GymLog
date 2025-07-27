@@ -18,7 +18,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-    private static final String TAG = "Stan_GymLog";
+    public static final String TAG = "Stan_GymLog";
     String exercise = "";
     double weight = 0.0;
     int repetitions = 0;

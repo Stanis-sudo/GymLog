@@ -75,4 +75,15 @@ public class GymLog {
     public int hashCode() {
         return Objects.hash(id, exercise, weight, repetitions, logDate);
     }
+
+    @Override
+    public String toString() {
+        return "GymLog{" +
+                "id=" + id +
+                ", exercise='" + exercise + '\'' +
+                ", weight=" + weight +
+                ", repetitions=" + repetitions +
+                ", logDate=" + logDate +
+                '}';
+    }
 }

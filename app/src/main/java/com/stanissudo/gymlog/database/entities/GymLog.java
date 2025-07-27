@@ -5,6 +5,8 @@ import androidx.room.PrimaryKey;
 
 import com.stanissudo.gymlog.database.GymLogDatabase;
 
+import org.jspecify.annotations.NonNull;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -76,14 +78,13 @@ public class GymLog {
         return Objects.hash(id, exercise, weight, repetitions, logDate);
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "GymLog{" +
-                "id=" + id +
-                ", exercise='" + exercise + '\'' +
-                ", weight=" + weight +
-                ", repetitions=" + repetitions +
-                ", logDate=" + logDate +
-                '}';
+        return exercise + '\n' +
+                ", weight=" + weight + '\n' +
+                ", repetitions=" + repetitions + '\n' +
+                ", logDate=" + logDate.toString() + '\n' +
+                "=-=-=-=-=-=-=-=-=\n";
     }
 }

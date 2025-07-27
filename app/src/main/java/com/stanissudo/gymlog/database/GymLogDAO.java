@@ -14,7 +14,7 @@ public interface GymLogDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(GymLog gymlog);
 
-    @Query("Select * from " + GymLogDatabase.gymLogTable)
+    @Query("Select * from " + GymLogDatabase.gymLogTable + " ORDER BY logDate DESC")
     List<GymLog> getAllRecords();
 
 }

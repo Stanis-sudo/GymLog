@@ -19,12 +19,14 @@ public class GymLogRepository {
     private final GymLogDAO gymLogDAO;
     private final UserDAO userDAO;
     private LiveData<List<GymLog>> allLogs;
+    //private LiveData<User> currentUser;
 private static GymLogRepository repository;
     private GymLogRepository(Application application) {
         GymLogDatabase db = GymLogDatabase.getDatabase(application);
         this.gymLogDAO = db.gymLogDAO();
         this.userDAO = db.userDAO();
         this.allLogs = this.gymLogDAO.getAllRecords();
+        //this.currentUser = this.userDAO.getUserByName();
         //this.allLogs = (ArrayList<GymLog>) this.gymLogDAO.getAllRecords();
     }
 
@@ -79,5 +81,24 @@ private static GymLogRepository repository;
         GymLogDatabase.databaseWriteExecutor.execute(() ->{
             userDAO.insert(user);
         });
+    }
+
+    public User getUserByUserName(String username) {
+        //return userDAO.getUserByName(username);
+        Future<User> future = GymLogDatabase.databaseWriteExecutor.submit(
+                new Callable<User>() {
+                    @Override
+                    public User call() throws Exception {
+                        return userDAO.getUserByName(username);
+                    }
+                }
+        );
+        try {
+            return future.get();
+
+        } catch (InterruptedException | ExecutionException e) {
+            Log.d(MainActivity.TAG, "Problem getting user by username.");
+        }
+        return null;
     }
 }

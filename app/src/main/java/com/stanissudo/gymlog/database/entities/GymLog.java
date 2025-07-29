@@ -1,3 +1,9 @@
+/**
+ * @author Stan Permiakov
+ * @version 1.0
+ * @since 2025-07-28
+ */
+
 package com.stanissudo.gymlog.database.entities;
 
 import androidx.room.Entity;
@@ -11,6 +17,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+/**
+ * Represents a log entry for a user's gym activity.
+ * Each log includes an exercise, weight lifted, repetitions, and a timestamp.
+ */
 @Entity(tableName = GymLogDatabase.GYM_LOG_TABLE)
 public class GymLog {
     @PrimaryKey(autoGenerate = true)
@@ -21,7 +31,15 @@ public class GymLog {
     private int repetitions;
     private LocalDateTime logDate;
 
-
+    /**
+     * Constructs a GymLog entry with the given exercise data and user ID.
+     * Automatically sets the log date to the current time.
+     *
+     * @param exercise    The name of the exercise performed.
+     * @param weight      The weight lifted in the exercise.
+     * @param repetitions The number of repetitions performed.
+     * @param userId      The ID of the user who performed the exercise.
+     */
     public GymLog(String exercise, double weight, int repetitions, int userId) {
         this.userId = userId;
         this.exercise = exercise;
@@ -90,11 +108,15 @@ public class GymLog {
         return Objects.hash(id, userId, exercise, weight, repetitions, logDate);
     }
 
+    /**
+     * Returns a formatted string representation of this GymLog entry,
+     * including exercise details and timestamp.
+     */
     @NonNull
     @Override
     public String toString() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm:ss");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         String formattedDate = logDate.format(dateFormatter);
         String formattedTime = logDate.format(timeFormatter);
         return exercise + '\n' +

@@ -1,3 +1,9 @@
+/**
+ * @author Stan Permiakov
+ * @version 1.0
+ * @since 2025-07-28
+ */
+
 package com.stanissudo.gymlog.database;
 
 import android.content.Context;
@@ -19,16 +25,34 @@ import org.jspecify.annotations.NonNull;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * GymLogDatabase is the main access point to the Room database.
+ * It defines the database configuration and serves as the app's single
+ * source of truth for GymLog and User data persistence.
+ * It includes DAOs for accessing GymLog and User tables.
+ */
 @TypeConverters(LocalDataTypeConverter.class)
 @Database(entities = {GymLog.class, User.class}, version = 3, exportSchema = false)
 public abstract class GymLogDatabase extends RoomDatabase {
+
+    /** Table name for user data */
     public static final String USER_TABLE = "userTable";
-    private static final String DATABASE_NAME = "GymLogDatabase";
+
+    /** Table name for gym log entries */
     public static final String GYM_LOG_TABLE = "gymLogTable";
+    private static final String DATABASE_NAME = "GymLogDatabase";
     private static volatile GymLogDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;
+
+    /** Fixed thread pool executor for background DB operations */
     static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
+    /**
+     * Gets the singleton instance of the database.
+     *
+     * @param context Application context
+     * @return The GymLogDatabase instance
+     */
     static GymLogDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (GymLogDatabase.class) {
@@ -44,6 +68,10 @@ public abstract class GymLogDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
+    /**
+     * Callback triggered when the database is first created.
+     * Inserts default admin and test users.
+     */
     private static final RoomDatabase.Callback addDefaultValues = new RoomDatabase.Callback() {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
@@ -62,7 +90,15 @@ public abstract class GymLogDatabase extends RoomDatabase {
         }
     };
 
+    /**
+     * Provides access to GymLogDAO.
+     * @return GymLogDAO instance
+     */
     public abstract GymLogDAO gymLogDAO();
 
+    /**
+     * Provides access to UserDAO.
+     * @return UserDAO instance
+     */
     public abstract UserDAO userDAO();
 }

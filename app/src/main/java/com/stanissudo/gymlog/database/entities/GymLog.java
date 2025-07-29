@@ -8,6 +8,7 @@ import com.stanissudo.gymlog.database.GymLogDatabase;
 import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Entity(tableName = GymLogDatabase.GYM_LOG_TABLE)
@@ -19,6 +20,7 @@ public class GymLog {
     private double weight;
     private int repetitions;
     private LocalDateTime logDate;
+
 
     public GymLog(String exercise, double weight, int repetitions, int userId) {
         this.userId = userId;
@@ -91,10 +93,15 @@ public class GymLog {
     @NonNull
     @Override
     public String toString() {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm:ss");
+        String formattedDate = logDate.format(dateFormatter);
+        String formattedTime = logDate.format(timeFormatter);
         return exercise + '\n' +
-                ", weight=" + weight + '\n' +
-                ", repetitions=" + repetitions + '\n' +
-                ", logDate=" + logDate.toString() + '\n' +
+                "Weight: " + weight + '\n' +
+                "Repetitions: " + repetitions + '\n' +
+                formattedDate + '\n' +
+                formattedTime + '\n' +
                 "=-=-=-=-=-=-=-=-=\n";
     }
 }

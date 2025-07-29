@@ -45,14 +45,16 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        repository = GymLogRepository.getRepository(getApplication());
+
         loginUser();
         invalidateOptionsMenu();
         if(loggedInUserId == -1){
             Intent intent = LoginActivity.loginIntentFactory(getApplicationContext());
             startActivity(intent);
+            return;
         }
 
-        repository = GymLogRepository.getRepository(getApplication());
         binding.logDisplayTextView.setMovementMethod(new ScrollingMovementMethod());
         updateDisplay();
         binding.logButton.setOnClickListener(new View.OnClickListener() {
@@ -73,24 +75,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        user = new User("Stan", "password");
         loggedInUserId = getIntent().getIntExtra(MAIN_ACTIVITY_USER_ID, -1);
+
+        if (loggedInUserId == -1) {
+            return;
+        }
+
+        repository.getUserNameById(loggedInUserId).observe(this, loadedUser -> {
+            if (loadedUser != null) {
+                user = loadedUser;
+                // now you can access user.getUsername(), etc.
+                invalidateOptionsMenu(); // If you want to update the menu title with the username
+            } else {
+                Toast.makeText(this, "User not found in database", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.logoutMenuItem);
         item.setVisible(true);
-        item.setTitle(user.getUsername());
-        item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem item) {
-                //Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
-                //logout();
-                showLogoutDialog();
-                return false;
-            }
+        if (user != null) {
+            item.setTitle(user.getUsername());
+        }
+        item.setOnMenuItemClickListener(menuItem -> {
+            showLogoutDialog();
+            return true;
         });
+//        item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(@NonNull MenuItem item) {
+//                //Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
+//                //logout();
+//                showLogoutDialog();
+//                return false;
+//            }
+//        });
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -115,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void logout() {
         startActivity(LoginActivity.loginIntentFactory(getApplicationContext()));
+        finish();
     }
 
     @Override
@@ -142,7 +165,11 @@ public class MainActivity extends AppCompatActivity {
 //        if (allLogs.isEmpty()) {
 //            binding.logDisplayTextView.setText(R.string.nothing_to_show_time_to_hit_the_gym);
 //        }
-        repository.getAllLogs().observe(this, allLogs -> {
+        repository.getUserLogs(loggedInUserId).observe(this, allLogs -> {
+            if (allLogs == null || allLogs.isEmpty()) {
+                binding.logDisplayTextView.setText(R.string.nothing_to_show_time_to_hit_the_gym);
+                return;
+            }
             // Update your UI here
         StringBuilder sb = new StringBuilder();
         for (GymLog log : allLogs) {

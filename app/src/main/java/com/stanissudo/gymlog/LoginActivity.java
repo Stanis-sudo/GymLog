@@ -13,6 +13,8 @@ import com.stanissudo.gymlog.database.entities.User;
 import com.stanissudo.gymlog.databinding.ActivityLoginBinding;
 import com.stanissudo.gymlog.databinding.ActivityMainBinding;
 
+import java.util.function.BiConsumer;
+
 import javax.security.auth.login.LoginException;
 
 public class LoginActivity extends AppCompatActivity {
@@ -27,32 +29,36 @@ public class LoginActivity extends AppCompatActivity {
 
         repository = GymLogRepository.getRepository(getApplication());
 
-        binding.loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Integer userId = verifyUser();
-                if(userId == null){
-                    Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_SHORT).show();
-                } else {
+        binding.loginButton.setOnClickListener(v -> {
+            verifyUser((userId, success) -> {
+                if (success && userId != null) {
                     Intent intent = MainActivity.mainActivityIntentFactory(getApplicationContext(), userId);
                     startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_SHORT).show();
                 }
-            }
+            });
         });
     }
 
-    private Integer verifyUser() {
+    private void verifyUser(BiConsumer<Integer, Boolean> callback) {
         String username = binding.usernameLoginEditText.getText().toString();
         String password = binding.passwordLoginEditText.getText().toString();
-        if(username.isEmpty() || password.isEmpty()){
+
+        if (username.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Username and Password may not be blank.", Toast.LENGTH_SHORT).show();
-            return null;
+            callback.accept(null, false);
+            return;
         }
-        User user = repository.getUserByUserName(username);
-        if(user != null && password.equals(user.getPassword())){
-            return user.getId();
-        }
-        return null;
+
+        repository.getUserByUserName(username).observe(this, user -> {
+            if (user != null && password.equals(user.getPassword())) {
+                callback.accept(user.getId(), true);
+            } else {
+                callback.accept(null, false);
+            }
+        });
     }
 
     static Intent loginIntentFactory(Context context) {
